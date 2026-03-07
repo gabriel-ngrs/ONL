@@ -118,3 +118,85 @@ chore: adiciona requirements.txt com dependências do projeto
   saídas visíveis, progressão didática.
 - Commits devem ser feitos a cada mudança significativa (nova função, correção importante,
   nova seção concluída).
+
+---
+
+## Skills Disponíveis
+
+Skills são capacidades especializadas invocadas com o comando `/nome-da-skill`. Abaixo
+estão as aprovadas para este projeto, com instrução clara de quando e onde usar cada uma.
+
+### `python-pro` — Referência passiva de implementação
+
+**O que faz:** Garante código Python idiomático, type-safe e bem estruturado.
+Cobre type hints, docstrings no estilo Google, padrões Pythonic e PEP 8.
+
+**Quando invocar:** Antes de implementar qualquer seção nova do script principal
+(`regressao_logistica.py`) — especialmente os algoritmos de otimização (Etapas 3, 4 e 5).
+Também útil ao revisar funções já escritas que pareçam verbosas ou pouco idiomáticas.
+
+**Onde se aplica:** `scripts/regressao_logistica.py`
+
+**Exemplo de gatilho:**
+> "Vamos implementar o gradiente descendente com busca em linha" → invocar `/python-pro`
+> antes de começar.
+
+---
+
+### `doc-coauthoring` — Escrita do relatório e do notebook
+
+**O que faz:** Conduz um fluxo estruturado de co-autoria em 3 estágios: coleta de
+contexto, refinamento seção por seção, e teste com leitor externo (sub-agente sem
+contexto). Evita que o relatório faça sentido apenas para quem já conhece o projeto.
+
+**Quando invocar:** Ao iniciar a escrita do relatório técnico ou ao estruturar o
+notebook de apresentação. Também útil para redigir seções matemáticas (derivação do
+gradiente, prova de convexidade via Hessiana) que precisam ser acessíveis à banca.
+
+**Onde se aplica:** Relatório final (`.pdf`/`.md`) e `notebooks/apresentacao.ipynb`
+
+**Prazo crítico:** relatório em **26/03/2026**, apresentação em **30/03–01/04/2026**.
+
+**Exemplo de gatilho:**
+> "Vamos começar a escrever o relatório" → invocar `/doc-coauthoring` imediatamente.
+
+---
+
+### `the-fool` — Revisão crítica antes da apresentação
+
+**O que faz:** Aplica raciocínio crítico estruturado em 5 modos (Socrático, Dialético,
+Pré-mortem, Red team, Auditoria de evidências) para encontrar pontos cegos, premissas
+não declaradas e argumentos fracos.
+
+**Quando invocar:** Na semana anterior à apresentação, após a implementação estar
+completa. Útil para antecipar perguntas difíceis do professor sobre as escolhas
+matemáticas e de implementação.
+
+**Perguntas típicas que a skill ajuda a preparar:**
+- Por que busca em linha de Armijo e não passo fixo?
+- A Hessiana de 24×24 realmente compensa computacionalmente com 30k amostras?
+- Como justificar o critério de parada escolhido?
+- Newton converge mais rápido, mas a que custo de memória?
+
+**Onde se aplica:** Revisão geral do projeto antes da apresentação.
+
+**Exemplo de gatilho:**
+> "Quero stress-testar nossas escolhas antes da apresentação" → invocar `/the-fool`.
+
+---
+
+### `debugging-wizard` — Diagnóstico de falhas nos algoritmos
+
+**O que faz:** Investiga erros, analisa comportamentos inesperados e encontra causas
+raiz. Especialmente útil para falhas silenciosas em algoritmos numéricos (NaN, divergência,
+oscilação, convergência prematura).
+
+**Quando invocar:** Se qualquer método de otimização apresentar comportamento estranho:
+perda que não decresce, gradiente que explode, Newton que diverge, ou resultados
+inconsistentes entre rodadas.
+
+**Onde se aplica:** `scripts/regressao_logistica.py` durante as Etapas 3, 4 e 5.
+
+**Exemplo de gatilho:**
+> "O gradiente descendente está divergindo" ou "a perda virou NaN" → invocar
+> `/debugging-wizard`.
