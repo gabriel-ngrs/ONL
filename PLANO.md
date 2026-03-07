@@ -317,11 +317,11 @@ Etapa 1  ->  Etapa 2  ->  Etapa 3  ->  Etapa 4
 
 ## Checklist de Conclusão
 
-- [ ] **Etapa 1** — Ambiente configurado, dataset carregado e pré-processado
-- [ ] **Etapa 2** — Sigmoide, perda, gradiente e hessiana implementados e testados
-- [ ] **Etapa 3** — Todos os métodos de busca em linha implementados
-- [ ] **Etapa 4** — Gradiente descendente e Newton implementados e convergindo
-- [ ] **Etapa 5** — Todas as métricas implementadas
-- [ ] **Etapa 6** — Experimentos executados, gráficos gerados
+- [x] **Etapa 1** — Ambiente configurado, dataset carregado e pré-processado
+- [x] **Etapa 2** — Sigmoide, perda, gradiente e hessiana implementados e testados
+- [x] **Etapa 3** — Todos os métodos de busca em linha implementados
+- [x] **Etapa 4** — Gradiente descendente e Newton implementados e convergindo
+- [x] **Etapa 5** — Todas as métricas implementadas
+- [x] **Etapa 6** — Experimentos executados, gráficos gerados
 - [ ] **Etapa 7** — Notebook organizado e pronto para apresentação
 - [ ] **Etapa 8** — Relatório redigido e revisado
