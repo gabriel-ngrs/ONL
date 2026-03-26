@@ -83,9 +83,12 @@ class RegressaoLogistica:
         self  (permite encadeamento: modelo.fit(X, y).predict(X_test))
         """
         
+        # Converte para float para evitar matrizes dtype=object no Newton.
+        X_base = np.asarray(_X, dtype=float)
+        y = np.asarray(_y, dtype=float)
+
         #adiciona coluna do bias
-        X = np.c_[np.ones((np.array(_X).shape[0], 1)), np.array(_X)]  
-        y = np.array(_y, dtype=float)
+        X = np.c_[np.ones((X_base.shape[0], 1), dtype=float), X_base]
 
         w0 = np.zeros(X.shape[1]) 
 
@@ -105,7 +108,8 @@ class RegressaoLogistica:
         Retorna P(y=1|x) = σ(xᵀw) para cada exemplo.
         """
         self._checar_treinado()
-        X = np.c_[np.ones((np.array(_X).shape[0], 1)), np.array(_X)]
+        X_base = np.asarray(_X, dtype=float)
+        X = np.c_[np.ones((X_base.shape[0], 1), dtype=float), X_base]
         return self._sigmoide(X @ self.w)
 
     def predict(self, _X):
@@ -118,7 +122,8 @@ class RegressaoLogistica:
 
         """
         self._checar_treinado()
-        X = np.c_[np.ones((np.array(_X).shape[0], 1)), np.array(_X)]
+        X_base = np.asarray(_X, dtype=float)
+        X = np.c_[np.ones((X_base.shape[0], 1), dtype=float), X_base]
         prod_esc = X @ self.w
         return (self._sigmoide(prod_esc) >= 0.5).astype(float)
         # Para y ∈ {-1,+1}: return np.sign(prod_esc)   ← linha original
@@ -153,6 +158,7 @@ class RegressaoLogistica:
         Relação com a classe original
 
         """
+        z = np.asarray(z, dtype=float)  # Garante que z é um array NumPy float
         z_clip = np.clip(z, -500.0, 500.0)
         return 1.0 / (1.0 + np.exp(-z_clip))
 
