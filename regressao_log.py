@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Callable
 import numpy as np
+import time
 
 
 class RegressaoLogistica:
@@ -63,6 +64,8 @@ class RegressaoLogistica:
         # variáveis para análise de convergência
         self.historico_perda_: list[float]       = []
         self.historico_norma_grad_: list[float]  = []
+        self.historico_alpha_: list[float]       = []
+        self.historico_tempo_: list[float]       = []
         self.n_iteracoes_: int                   = 0
 
     # Adaptado: delega para o otimizador selecionado, que usa busca em
@@ -93,13 +96,15 @@ class RegressaoLogistica:
         w0 = np.zeros(X.shape[1]) 
 
         if self.metodo_otimizacao == 'gradiente_descendente':
-            w, hist_l, hist_g, n = self._gradiente_descendente(w0, X, y)
+            w, hist_l, hist_g, hist_a, hist_t, n = self._gradiente_descendente(w0, X, y)
         else:
-            w, hist_l, hist_g, n = self._metodo_newton(w0, X, y)
+            w, hist_l, hist_g, hist_a, hist_t, n = self._metodo_newton(w0, X, y)
 
         self.w                     = w
         self.historico_perda_      = hist_l
         self.historico_norma_grad_ = hist_g
+        self.historico_alpha_      = hist_a
+        self.historico_tempo_      = hist_t
         self.n_iteracoes_          = n
         return self
 
@@ -398,6 +403,9 @@ class RegressaoLogistica:
         w = w0.copy()
         hist_perda = []
         hist_grad = []
+        hist_alpha = []
+        t0 = time.perf_counter()
+        hist_tempo = []
 
         for k in range(self.tmax):
             grad = self._gradiente(w, X, y, self.lambda_)
@@ -405,10 +413,11 @@ class RegressaoLogistica:
 
             hist_perda.append(self._funcao_perda(w, X, y, self.lambda_))
             hist_grad.append(norma)
+            hist_tempo.append(time.perf_counter() - t0)
 
             # Critério de parada — versão numérica do "norma == 0" original
             if norma < self.tolerancia:
-                return w, hist_perda, hist_grad, k
+                return w, hist_perda, hist_grad, hist_alpha, hist_tempo, k
 
             # direção de descida: idêntica ao original
             direcao = -grad
@@ -422,14 +431,16 @@ class RegressaoLogistica:
             )
 
             alpha = self._passo_otimo(g)
+            hist_alpha.append(alpha)
             w = w + alpha * direcao
 
         # Estado final se atingir tmax sem convergir
         grad_f = self._gradiente(w, X, y, self.lambda_)
         hist_perda.append(self._funcao_perda(w, X, y, self.lambda_))
         hist_grad.append(np.linalg.norm(grad_f))
+        hist_tempo.append(time.perf_counter() - t0)
 
-        return w, hist_perda, hist_grad, self.tmax
+        return w, hist_perda, hist_grad, hist_alpha, hist_tempo, self.tmax
 
     def _metodo_newton(self, w0, X, y):
         """
@@ -460,6 +471,9 @@ class RegressaoLogistica:
         w = w0.copy()
         hist_perda = []
         hist_grad = []
+        hist_alpha = []
+        t0 = time.perf_counter()
+        hist_tempo = []
 
         for k in range(self.tmax):
             grad = self._gradiente(w, X, y, self.lambda_)
@@ -467,9 +481,10 @@ class RegressaoLogistica:
 
             hist_perda.append(self._funcao_perda(w, X, y, self.lambda_))
             hist_grad.append(norma)
+            hist_tempo.append(time.perf_counter() - t0)
 
             if norma < self.tolerancia:
-                return w, hist_perda, hist_grad, k
+                return w, hist_perda, hist_grad, hist_alpha, hist_tempo, k
 
             H = self._hessiana(w, X, self.lambda_)
             H_reg = H + 1e-8 * np.eye(H.shape[0])  # Tikhonov: estabilidade
@@ -486,14 +501,16 @@ class RegressaoLogistica:
             )
 
             alpha = self._passo_otimo(g)
+            hist_alpha.append(alpha)
             w = w + alpha * direcao
 
         # Estado final se atingir tmax sem convergir
         grad_f = self._gradiente(w, X, y, self.lambda_)
         hist_perda.append(self._funcao_perda(w, X, y, self.lambda_))
         hist_grad.append(np.linalg.norm(grad_f))
+        hist_tempo.append(time.perf_counter() - t0)
 
-        return w, hist_perda, hist_grad, self.tmax
+        return w, hist_perda, hist_grad, hist_alpha, hist_tempo, self.tmax
 
     def _checar_treinado(self) -> None:
         if self.w is None:
