@@ -30,8 +30,7 @@ Ambos os métodos são avaliados no problema de **previsão de inadimplência de
 ONL/
 ├── regressao_log.py                        # Implementação principal da classe RegressaoLogistica
 ├── main.ipynb                              # Notebook principal com análise completa
-├── notebooks/
-│   └── apresentacao.ipynb                  # Notebook de apresentação formal do projeto
+├── Relatorio_Final_ONL_v2.docx             # Relatório final (versão atualizada)
 ├── dados/
 │   ├── credito.csv                         # Dataset UFPB (10.128 amostras, 15 features)
 │   └── credit_default.csv                  # Dataset UCI Credit Card Default (30.000 amostras)
@@ -73,6 +72,8 @@ Contém a classe `RegressaoLogistica` com todos os algoritmos implementados do z
 - `w` — parâmetros ótimos θ*
 - `historico_perda_` — valor da perda por iteração
 - `historico_norma_grad_` — norma do gradiente por iteração
+- `historico_alpha_` — passo α ótimo por iteração
+- `historico_tempo_` — tempo acumulado (segundos) por iteração
 - `n_iteracoes_` — total de iterações até convergência
 
 ---
@@ -97,10 +98,6 @@ Notebook principal estruturado nas seguintes seções:
 | 10 | Conclusões |
 
 ---
-
-### `notebooks/apresentacao.ipynb` — Apresentação Formal
-
-Versão mais concisa do `main.ipynb`, usando o dataset **UCI Credit Card Default** (30.000 amostras). Foca nos resultados principais para a apresentação da disciplina.
 
 ---
 
@@ -194,21 +191,31 @@ Todos os métodos recebem um intervalo inicial via busca por duplicação a part
 
 | Métrica | Gradiente Descendente | Método de Newton |
 |---------|----------------------|-----------------|
-| Iterações até convergência | 500+ (não convergiu) | **~5** |
-| Perda final | maior | menor (ótimo) |
-| Tempo de execução | baseline | **~5–10x mais rápido** |
+| Iterações até convergência | **35** | **3** |
+| Perda final L(θ*) | 0,3082 | 0,3082 |
+| ‖∇L(θ*)‖ final | 1,00 × 10⁻⁴ | 6,54 × 10⁻⁶ |
+| Tempo de execução | ~0,54 s | ~0,07 s |
+| Convergência teórica | Linear | Quadrática |
 
-> Newton converge em muito menos iterações pois usa a curvatura (Hessiana) para escalar a direção de descida, sendo invariante ao número de condição κ(H).
+> Newton convergiu em **11,7× menos iterações** e **7× menos tempo** que o GD, usando a curvatura da Hessiana para escalar a direção de descida.
 
-### Desempenho no Conjunto de Teste
+### Comparação dos Métodos de Busca em Linha (GD)
 
-| Métrica | Valor típico |
-|---------|-------------|
-| Acurácia | ~80–85% |
-| Precisão | ~70–75% |
-| Recall | ~60–70% |
-| F1-Score | ~65–72% |
-| AUC-ROC | ~85–90% |
+| Método | Iterações | Perda Final | Tempo |
+|--------|-----------|-------------|-------|
+| Seção Áurea | 35 | 0,3082 | 0,54 s |
+| Partição Igual | 35 | 0,3082 | 0,74 s |
+| Ajuste Quadrático | 35 | 0,3082 | 0,19 s |
+
+### Desempenho no Conjunto de Teste (Newton, dados originais)
+
+| Métrica | Valor |
+|---------|-------|
+| Acurácia | **86,53%** |
+| Precisão | 68,84% |
+| Recall | 29,23% |
+| F1-Score | 41,04% |
+| AUC-ROC | **87,34%** |
 
 ---
 
@@ -225,7 +232,7 @@ Todos os métodos recebem um intervalo inicial via busca por duplicação a part
 - Target: `inadimplente` (0/1)
 - Usado no notebook de apresentação
 
-**Pré-processamento:** normalização z-score + divisão treino/teste 80/20 (seed=42).
+**Pré-processamento:** one-hot encoding das variáveis categóricas, normalização z-score (`StandardScaler`) e divisão treino/teste 80/20 (seed=42, stratify=y).
 
 ---
 
@@ -234,9 +241,13 @@ Todos os métodos recebem um intervalo inicial via busca por duplicação a part
 ```python
 from regressao_log import RegressaoLogistica
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
-# Dividir dados
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Dividir e normalizar dados
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled  = scaler.transform(X_test)
 
 # Treinar com Gradiente Descendente + Seção Áurea
 modelo = RegressaoLogistica(
@@ -246,10 +257,10 @@ modelo = RegressaoLogistica(
     tolerancia=1e-6,
     lambda_=0.01
 )
-modelo.fit(X_train, y_train)
+modelo.fit(X_train_scaled, y_train)
 
 # Predição e avaliação
-y_pred = modelo.predict(X_test)
+y_pred = modelo.predict(X_test_scaled)
 print(f"Acurácia: {(y_pred == y_test).mean():.4f}")
 print(f"Iterações: {modelo.n_iteracoes_}")
 print(f"Perda final: {modelo.historico_perda_[-1]:.6f}")
@@ -261,7 +272,7 @@ modelo_newton = RegressaoLogistica(
     tmax=100,
     tolerancia=1e-6
 )
-modelo_newton.fit(X_train, y_train)
+modelo_newton.fit(X_train_scaled, y_train)
 ```
 
 ---
@@ -269,7 +280,7 @@ modelo_newton.fit(X_train, y_train)
 ## Dependências
 
 ```bash
-pip install numpy pandas scikit-learn matplotlib
+pip install numpy pandas scikit-learn imbalanced-learn matplotlib
 ```
 
 Para o notebook Julia (`Docs/Metodos_usando_intervalos.ipynb`), é necessário ter Julia instalado.
